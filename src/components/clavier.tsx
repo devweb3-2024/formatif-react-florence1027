@@ -31,6 +31,8 @@ const Clavier: React.FC<ClavierProps> = ({
         disabled={inactif}
         slotProps={{ htmlInput: { style: { textTransform: 'uppercase' } } }}
         fullWidth
+        //FC : Pour voir le textfield
+        sx={{backgroundColor: 'white'}}
       />
       <Button variant="contained" onClick={onEnter} disabled={inactif}>
         Entrer

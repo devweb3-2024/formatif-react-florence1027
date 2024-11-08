@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Container, Snackbar, Alert } from '@mui/material';
+import { Container, Snackbar, Alert, Button, Box } from '@mui/material';
 import GrilleMot from './grillemots';
 import { obtenirMotAleatoire, listeMots } from '../utils/mots';
 import Clavier from './clavier';
@@ -24,9 +24,20 @@ const Jeu: React.FC = () => {
     }
   }, [essais]);
 
+  // FC : Fonction pour recommencer la partie, réinitialise les variables et sélectionne un nouveau mot
+  const recommencerPartie = () => {
+    setMotCible(obtenirMotAleatoire());
+    setEssais([]);
+    setEssaiCourant("");
+    setFinPartie(false);
+    setMessage({text:"Recommencé!", severity: 'success'});
+  }
+
   const verifierDernierEssai = () => {
     const dernierEssai = essais[essais.length - 1];
-    if (dernierEssai === motCible) {
+    //if (dernierEssai === motCible) {
+    // FC : localeCompare pour comparer en ignorant les accents
+    if(dernierEssai.localeCompare(motCible.toLowerCase(), 'fr', {sensitivity: 'base'}) == 0) {
       setFinPartie(true);
       setMessage({
         text: 'Félicitations ! Vous avez trouvé le mot !',
@@ -49,11 +60,20 @@ const Jeu: React.FC = () => {
       });
       return;
     }
+    //FC : Parcourir la liste pour trouver le mot peu importe les accents
+    let estDansListe = false;
+    for (let i = 0; i < listeMots.length; i++) {
+      if (listeMots[i].localeCompare(essaiCourant.toLowerCase(),'fr', {sensitivity: 'base'})==0) {
+        estDansListe = true;
+      }
+    }
     if (
-      !listeMots.includes(
+      !estDansListe
+      //FC : La liste de mots est entièrement en lettres miniscules, on peut juste prendre l'essai actuel
+      /*!listeMots.includes(essaiCourant.toLowerCase()
         essaiCourant.charAt(0).toUpperCase() +
-          essaiCourant.slice(1).toLowerCase()
-      )
+        essaiCourant.slice(1).toLowerCase()
+      )*/
     ) {
       setMessage({
         text: "Ce mot n'est pas dans la liste.",
@@ -65,6 +85,7 @@ const Jeu: React.FC = () => {
     setEssaiCourant('');
   };
 
+//FC : J'ai ajouté un bouton pour recommencer la partie
   return (
     <Container maxWidth="sm">
       <GrilleMot
@@ -78,6 +99,7 @@ const Jeu: React.FC = () => {
         onEnter={handleSoumettreEssai}
         inactif={finPartie}
       />
+      
       {message && (
         <Snackbar open autoHideDuration={6000} onClose={() => setMessage(null)}>
           <Alert
@@ -89,6 +111,12 @@ const Jeu: React.FC = () => {
           </Alert>
         </Snackbar>
       )}
+      <Box sx={{display: 'flex', gap: 2 }}>
+        <Button variant="contained" onClick={recommencerPartie}>
+          Redémarrer la partie
+        </Button>
+      </Box>
+      
     </Container>
   );
 };
